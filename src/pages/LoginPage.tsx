@@ -10,7 +10,8 @@ export function LoginPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as { from?: string } | null)?.from ?? '/favorites'
+  const state = location.state as { from?: string; registered?: boolean } | null
+  const from = state?.from ?? '/favorites'
   const { status, error, fieldErrors } = useAppSelector((s) => s.auth)
   const [form, setForm] = useState({ email: '', password: '' })
 
@@ -30,6 +31,11 @@ export function LoginPage() {
       <p className="mb-6 text-sm text-muted-foreground">Log in to manage your favorite teams.</p>
 
       <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-border bg-card p-6" noValidate>
+        {state?.registered && !error && (
+          <p role="status" className="rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary">
+            Account created. Please log in.
+          </p>
+        )}
         {error && !fieldErrors && (
           <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
         )}

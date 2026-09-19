@@ -41,7 +41,11 @@ export const register = createAsyncThunk<AuthResult, RegisterInput, { rejectValu
   'auth/register',
   async (body, { rejectWithValue }) => {
     try {
-      return await authService.register(body)
+      const result = await authService.register(body)
+      // The API also logs the new user in via cookie. Registering must not sign them in,
+      // so drop that session and let them log in from the login form.
+      await authService.logout().catch(() => undefined)
+      return result
     } catch (e) {
       return rejectWithValue(toThunkError(e))
     }
@@ -104,7 +108,9 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, onSuccess)
       .addCase(login.rejected, onFail)
       .addCase(register.pending, onPending)
-      .addCase(register.fulfilled, onSuccess)
+      .addCase(register.fulfilled, (s) => {
+        s.status = 'succeeded'
+      })
       .addCase(register.rejected, onFail)
       .addCase(fetchMe.fulfilled, (s, a) => {
         s.user = a.payload

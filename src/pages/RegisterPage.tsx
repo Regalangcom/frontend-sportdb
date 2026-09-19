@@ -24,7 +24,9 @@ export function RegisterPage() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const result = await dispatch(register(form))
-    if (register.fulfilled.match(result)) navigate(from, { replace: true })
+    if (register.fulfilled.match(result)) {
+      navigate('/login', { replace: true, state: { from, registered: true } })
+    }
   }
 
   return (
