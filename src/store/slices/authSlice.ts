@@ -112,7 +112,10 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, onSuccess)
       .addCase(login.rejected, onFail)
       .addCase(register.pending, onPending)
-      .addCase(register.fulfilled, onSuccess)
+      .addCase(register.fulfilled, (s) => {
+        // Registering must not sign the user in: the returned token is deliberately not stored.
+        s.status = 'succeeded'
+      })
       .addCase(register.rejected, onFail)
       .addCase(fetchMe.fulfilled, (s, a) => {
         s.user = a.payload
