@@ -1,18 +1,15 @@
 import { useEffect } from 'react'
 import { AppRouter } from '@/routes/AppRouter'
-import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { useAppDispatch } from '@/store/hooks'
 import { fetchMe } from '@/store/slices/authSlice'
 
 function App() {
   const dispatch = useAppDispatch()
-  const hasToken = useAppSelector((s) => Boolean(s.auth.token))
-  const initialized = useAppSelector((s) => s.auth.initialized)
 
-  // Validate a stored token once on startup; a 401 logs the user out (see store/index.ts).
+  // The cookie is invisible to JS, so login state is only known by asking the API on startup.
   useEffect(() => {
-    if (hasToken && !initialized) dispatch(fetchMe())
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    dispatch(fetchMe())
+  }, [dispatch])
 
   return <AppRouter />
 }

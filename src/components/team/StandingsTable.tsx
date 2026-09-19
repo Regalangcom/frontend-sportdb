@@ -33,14 +33,14 @@ export function StandingsTable({ rows, highlightTeamId }: { rows: StandingRow[];
                   {r.strTeam}
                 </Link>
               </td>
-              <td className="px-2 py-2 text-center">{r.intPlayed}</td>
-              <td className="px-2 py-2 text-center">{r.intWin}</td>
-              <td className="px-2 py-2 text-center">{r.intDraw}</td>
-              <td className="px-2 py-2 text-center">{r.intLoss}</td>
-              <td className="px-2 py-2 text-center">{r.intGoalsFor}</td>
-              <td className="px-2 py-2 text-center">{r.intGoalsAgainst}</td>
-              <td className="px-2 py-2 text-center">{r.intGoalDifference}</td>
-              <td className="px-3 py-2 text-center font-bold text-primary">{r.intPoints}</td>
+              <td className="px-2 py-2 text-center">{r.intPlayed ?? '-'}</td>
+              <td className="px-2 py-2 text-center">{r.intWin ?? '-'}</td>
+              <td className="px-2 py-2 text-center">{r.intDraw ?? '-'}</td>
+              <td className="px-2 py-2 text-center">{r.intLoss ?? '-'}</td>
+              <td className="px-2 py-2 text-center">{r.intGoalsFor ?? '-'}</td>
+              <td className="px-2 py-2 text-center">{r.intGoalsAgainst ?? '-'}</td>
+              <td className="px-2 py-2 text-center">{r.intGoalDifference ?? '-'}</td>
+              <td className="px-3 py-2 text-center font-bold text-primary">{r.intPoints ?? '-'}</td>
             </tr>
           ))}
         </tbody>

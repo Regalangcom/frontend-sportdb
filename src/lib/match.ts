@@ -3,8 +3,6 @@ import type { Match } from '@/types/api'
 export interface MatchView {
   key: string
   title: string
-  home: string
-  away: string
   homeScore: string | null
   awayScore: string | null
   league: string | null
@@ -26,27 +24,13 @@ export function formatWib(value?: string | null): string {
   return hh ? `${date}, ${hh}:${mm} WIB` : date
 }
 
-const pick = (m: Match, keys: string[]): string | null => {
-  for (const k of keys) {
-    const v = m[k]
-    if (v !== undefined && v !== null && v !== '') return String(v)
-  }
-  return null
-}
-
-/** The match payload is loosely typed, so accept both TheSportsDB and snake_case key styles. */
 export function toMatchView(m: Match, index: number): MatchView {
-  const home = pick(m, ['strHomeTeam', 'home_team', 'home_team_name', 'home']) ?? ''
-  const away = pick(m, ['strAwayTeam', 'away_team', 'away_team_name', 'away']) ?? ''
-  const title = pick(m, ['strEvent', 'event', 'event_name', 'name', 'title']) ?? `${home} vs ${away}`
   return {
-    key: String(m.id ?? pick(m, ['idEvent', 'event_id']) ?? index),
-    title,
-    home,
-    away,
-    homeScore: pick(m, ['intHomeScore', 'home_score']),
-    awayScore: pick(m, ['intAwayScore', 'away_score']),
-    league: pick(m, ['strLeague', 'league', 'league_name']),
+    key: m.id ?? String(index),
+    title: m.event ?? `${m.home_team ?? '?'} vs ${m.away_team ?? '?'}`,
+    homeScore: m.home_score,
+    awayScore: m.away_score,
+    league: m.league,
     timeLabel: formatWib(m.match_time_wib),
   }
 }

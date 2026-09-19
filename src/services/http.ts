@@ -1,4 +1,4 @@
-import { API_URL, TOKEN_STORAGE_KEY } from '@/config/env'
+import { API_URL } from '@/config/env'
 import type { ApiEnvelope, FieldErrors } from '@/types/api'
 
 export class ApiError extends Error {
@@ -26,26 +26,18 @@ export const setUnauthorizedHandler = (handler: () => void) => {
   onUnauthorized = handler
 }
 
-export const tokenStorage = {
-  get: () => {
-    try {
-      return localStorage.getItem(TOKEN_STORAGE_KEY)
-    } catch {
-      return null
-    }
-  },
-  set: (token: string) => localStorage.setItem(TOKEN_STORAGE_KEY, token),
-  clear: () => localStorage.removeItem(TOKEN_STORAGE_KEY),
-}
-
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'DELETE'
   body?: unknown
   query?: Record<string, string | undefined>
-  /** Login/register: a 401 means wrong credentials, not an expired session. */
+  /** Login/register/logout: a 401 there is not an expired session. */
   skipUnauthorizedHandler?: boolean
 }
 
+/**
+ * The session lives in an HttpOnly `api_token` cookie set by the API, so JS never sees the token.
+ * `credentials: 'include'` makes the browser send it; `X-Requested-With` is required on writes (else 403).
+ */
 export async function request<T>(
   path: string,
   { method = 'GET', body, query, skipUnauthorizedHandler }: RequestOptions = {},
@@ -55,22 +47,25 @@ export async function request<T>(
     if (v) url.searchParams.set(k, v)
   })
 
-  const headers: Record<string, string> = { Accept: 'application/json' }
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+  }
   if (body !== undefined) headers['Content-Type'] = 'application/json'
-  const token = tokenStorage.get()
-  if (token) headers.Authorization = `Bearer ${token}`
 
   let res: Response
   try {
     res = await fetch(url, {
       method,
       headers,
+      credentials: 'include',
       body: body !== undefined ? JSON.stringify(body) : undefined,
     })
   } catch {
     throw new ApiError('Cannot reach the server. Check your connection.', 0)
   }
 
+  // 404/405 from unknown routes are plain Laravel JSON without the envelope, so read defensively.
   let json: Partial<ApiEnvelope<T>> | null = null
   try {
     json = await res.json()

@@ -1,26 +1,22 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { authService } from '@/services/auth.service'
-import { tokenStorage } from '@/services/http'
 import type { FieldErrors, User } from '@/types/api'
 import { toThunkError } from '../thunkError'
 import type { Status, ThunkError } from '../types'
 
 interface AuthState {
+  /** Logged-in user. The token itself lives in an HttpOnly cookie and is never visible to JS. */
   user: User | null
-  token: string | null
-  /** True once the startup token check (GET /me) has finished. */
+  /** True once the startup session check (GET /me) has finished. */
   initialized: boolean
   status: Status
   error: string | null
   fieldErrors: FieldErrors | null
 }
 
-const token = tokenStorage.get()
-
 const initialState: AuthState = {
   user: null,
-  token,
-  initialized: !token,
+  initialized: false,
   status: 'idle',
   error: null,
   fieldErrors: null,
@@ -28,7 +24,7 @@ const initialState: AuthState = {
 
 type Credentials = { email: string; password: string }
 type RegisterInput = Credentials & { name: string; password_confirmation: string }
-type AuthResult = { user: User; token: string }
+type AuthResult = { user: User }
 
 export const login = createAsyncThunk<AuthResult, Credentials, { rejectValue: ThunkError }>(
   'auth/login',
@@ -67,14 +63,12 @@ export const logout = createAsyncThunk('auth/logout', async () => {
   try {
     await authService.logout()
   } catch {
-    /* token is dropped locally regardless */
+    /* the local session is cleared regardless */
   }
 })
 
 const clearSession = (s: AuthState) => {
-  tokenStorage.clear()
   s.user = null
-  s.token = null
 }
 
 const authSlice = createSlice({
@@ -97,9 +91,7 @@ const authSlice = createSlice({
     const onSuccess = (s: AuthState, a: { payload: AuthResult }) => {
       s.status = 'succeeded'
       s.user = a.payload.user
-      s.token = a.payload.token
       s.initialized = true
-      tokenStorage.set(a.payload.token)
     }
     const onFail = (s: AuthState, a: { payload?: ThunkError }) => {
       s.status = 'failed'
@@ -119,7 +111,7 @@ const authSlice = createSlice({
         s.initialized = true
       })
       .addCase(fetchMe.rejected, (s) => {
-        // A 401 already cleared the session via sessionExpired; other errors keep the token.
+        // 401 just means "not logged in" (sessionExpired already cleared the user).
         s.initialized = true
       })
       .addCase(logout.fulfilled, (s) => {

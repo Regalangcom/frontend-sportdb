@@ -10,11 +10,14 @@ export interface User {
   id: number
   name: string
   email: string
+  email_verified_at?: string | null
+  created_at?: string
+  updated_at?: string
 }
 
+/** Login/register: the token itself arrives as an HttpOnly cookie, not in the body. */
 export interface AuthPayload {
   user: User
-  token: string
 }
 
 export interface Sport {
@@ -48,9 +51,16 @@ export interface Team {
 }
 
 export interface Match {
-  id?: string | number
-  match_time_wib?: string | null
-  [key: string]: unknown
+  id: string | null
+  event: string | null
+  league: string | null
+  home_team: string | null
+  away_team: string | null
+  home_score: string | null
+  away_score: string | null
+  /** Already Asia/Jakarta, e.g. "2026-01-01 19:00:00", no timezone suffix. */
+  match_time_wib: string | null
+  venue: string | null
 }
 
 export interface StandingRow {
@@ -59,14 +69,16 @@ export interface StandingRow {
   idTeam: string
   strTeam: string
   strBadge?: string | null
-  intPlayed: string
-  intWin: string
-  intDraw: string
-  intLoss: string
-  intGoalsFor: string
-  intGoalsAgainst: string
-  intGoalDifference: string
-  intPoints: string
+  strSeason?: string
+  strForm?: string | null
+  intPlayed?: string
+  intWin?: string
+  intDraw?: string
+  intLoss?: string
+  intGoalsFor?: string
+  intGoalsAgainst?: string
+  intGoalDifference?: string
+  intPoints?: string
 }
 
 export interface Favorite {
@@ -74,6 +86,7 @@ export interface Favorite {
   team_id: string
   team_name: string
   team_badge?: string | null
+  created_at?: string
 }
 
 export interface AddFavoritePayload {
