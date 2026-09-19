@@ -13,7 +13,7 @@ This repository has **2 branches**:
 | Branch | Description |
 |---|---|
 | `master` | Main branch. Authentication uses an **API token** (Bearer token). |
-| `refactor_v2` | Refactored version. Uses **axios** to handle authentication via **cookies**. |
+| `refactor_v2` | Refactored version. Uses **fetch** to handle authentication via **cookies**. |
 
 Choose a branch before running the app:
 
