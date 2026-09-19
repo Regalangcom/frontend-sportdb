@@ -21,7 +21,7 @@ Choose a branch before running the app:
 # main branch (API token based)
 git checkout master
 
-# refactor branch (axios + cookies)
+# refactor branch (fetch 'include' + cookies)
 git checkout refactor_v2
 ```
 
